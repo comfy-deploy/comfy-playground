@@ -28,7 +28,7 @@ export function useComfyQuery<
 		queryFn: async () => {
 			// @ts-ignore
 			const data = await cd[cdKey][method](...params);
-			console.log(data);
+			// console.log(data);
 			return data as R;
 		},
 		...options,

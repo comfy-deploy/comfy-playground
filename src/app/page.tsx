@@ -21,6 +21,10 @@ import { InputForm } from "./components/input-form";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 import { useInputStore, useOutputStore } from "./store/store";
 import { Icon } from "./components/cd-icon";
+import { DeploymentModel } from "comfydeploy/models/components";
+import { create } from "zustand";
+import { Spinner } from "@nextui-org/spinner";
+import { Skeleton } from "@nextui-org/skeleton";
 
 export default function Home() {
 	return (
@@ -59,28 +63,11 @@ export default function Home() {
 }
 
 function App() {
-	const [selectedDeploymentId, setSelectedDeploymentId] = useState<
-		string | null
-	>(null);
-
-	const { data: deployments } = useComfyQuery("deployments", "list", [
-		{ environment: "production" },
-	]);
+	const { selectedDeployment } = useDeploymentStore();
 
 	// Use the Zustand stores
 	const { outputs, addOutput, clearOutputs } = useOutputStore();
 	// const { inputValues, setInputValue, setAllInputValues } = useInputStore();
-
-	// Auto-select the first deployment if available
-	useEffect(() => {
-		if (deployments && deployments.length > 0 && !selectedDeploymentId) {
-			setSelectedDeploymentId(deployments[0].id);
-		}
-	}, [deployments, selectedDeploymentId]);
-
-	const selectedDeployment = deployments?.find(
-		(deployment) => deployment.id === selectedDeploymentId,
-	);
 
 	const [isRunning, setIsRunning] = useState(false);
 	const [log, setLog] = useState<string[]>([]);
@@ -140,59 +127,105 @@ function App() {
 
 	return (
 		<div className="max-w-7xl mx-auto">
-			{deployments && (
-				<div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-					<Card className="flex flex-col">
-						<CardHeader className="flex flex-col gap-2">
-							<Autocomplete
-								label="Select a deployment"
-								placeholder="Search and choose a deployment"
-								value={selectedDeploymentId ?? undefined}
-								onSelectionChange={(key) =>
-									setSelectedDeploymentId(key as string)
-								}
-							>
-								{deployments.map((deployment) => (
-									<AutocompleteItem key={deployment.id} value={deployment.id}>
-										{deployment.workflow.name}
-									</AutocompleteItem>
-								))}
-							</Autocomplete>
-						</CardHeader>
-						<Divider />
-						{selectedDeployment && (
-							<CardBody className="flex-grow flex flex-col">
-								<InputForm
-									inputTypes={selectedDeployment.inputTypes ?? []}
-									inputValues={inputValues}
-									setInputValues={setInputValues} // Use the store's setAllInputValues
-								/>
-								<div className="flex-grow" />
-								<div className="mt-6">
-									<Button
-										color="primary"
-										onClick={handleRun}
-										className="w-full"
-										size="md"
-										isLoading={isRunning}
-									>
-										{isRunning ? "Running..." : "Run"}
-										<Kbd
-											keys={isMac ? ["command", "enter"] : ["ctrl", "enter"]}
-										/>
-									</Button>
-								</div>
-							</CardBody>
-						)}
-					</Card>
+			<div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<Card className="flex flex-col">
+					<CardHeader className="flex flex-col gap-2">
+						<DeploymentDropdown />
+					</CardHeader>
+					<Divider />
+					{selectedDeployment && (
+						<CardBody className="flex-grow flex flex-col">
+							<InputForm
+								inputTypes={selectedDeployment.inputTypes ?? []}
+								inputValues={inputValues}
+								setInputValues={setInputValues} // Use the store's setAllInputValues
+							/>
+							<div className="flex-grow" />
+							<div className="mt-6">
+								<Button
+									color="primary"
+									onClick={handleRun}
+									className="w-full"
+									size="md"
+									isLoading={isRunning}
+								>
+									{isRunning ? "Running..." : "Run"}
+									<Kbd
+										keys={isMac ? ["command", "enter"] : ["ctrl", "enter"]}
+									/>
+								</Button>
+							</div>
+						</CardBody>
+					)}
+				</Card>
 
-					<div className="space-y-6">
-						<ScrollableContent title="Log" content={log} />
-						<OutputDisplay outputs={outputs} />{" "}
-						{/* Use outputs from the store */}
-					</div>
+				<div className="space-y-6">
+					<ScrollableContent title="Log" content={log} />
+					<OutputDisplay outputs={outputs} /> {/* Use outputs from the store */}
 				</div>
-			)}
+			</div>
 		</div>
+	);
+}
+
+interface DeploymentState {
+	selectedDeployment: DeploymentModel | null;
+	setSelectedDeployment: (deployment: DeploymentModel | null) => void;
+}
+
+export const useDeploymentStore = create<DeploymentState>((set) => ({
+	selectedDeployment: null,
+	setSelectedDeployment: (deployment) =>
+		set({ selectedDeployment: deployment }),
+}));
+
+export function DeploymentDropdown() {
+	const { data: deployments, isLoading } = useComfyQuery(
+		"deployments",
+		"list",
+		[{ environment: "production" }],
+	);
+
+	const { selectedDeployment, setSelectedDeployment } = useDeploymentStore();
+
+	// Auto-select the first deployment if available
+	useEffect(() => {
+		if (deployments && deployments.length > 0 && !selectedDeployment) {
+			setSelectedDeployment(deployments[0]);
+		}
+	}, [deployments, selectedDeployment, setSelectedDeployment]);
+
+	if (isLoading) {
+		return (
+			<Skeleton className="w-full rounded-lg">
+				<div className="h-8 w-full rounded-lg bg-secondary" />
+			</Skeleton>
+		);
+	}
+
+	if (!deployments || deployments.length === 0) {
+		return <p>No deployments available.</p>;
+	}
+
+	return (
+		<Autocomplete
+			// label="Select a deployment"
+			placeholder="Search and choose a deployment"
+			defaultSelectedKey={deployments[0].id}
+			size="sm"
+			onSelectionChange={(key) =>
+				setSelectedDeployment(
+					deployments.find((deployment) => deployment.id === key) ?? null,
+				)
+			}
+			defaultItems={deployments.map((deployment) => ({
+				key: deployment.id,
+				label: deployment.workflow.name,
+			}))}
+		>
+			{(item) => (
+				<AutocompleteItem key={item.key}>{item.label}</AutocompleteItem>
+			)}
+		</Autocomplete>
 	);
 }

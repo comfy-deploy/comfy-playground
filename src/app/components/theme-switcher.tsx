@@ -9,6 +9,7 @@ import { Sun, Moon } from "lucide-react";
 export function ThemeSwitcher() {
 	const [mounted, setMounted] = useState(false);
 	const { theme, setTheme } = useTheme();
+	const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>('light');
 
 	useEffect(() => {
 		setMounted(true);
@@ -16,17 +17,19 @@ export function ThemeSwitcher() {
 
 	if (!mounted) return null;
 
+	const isSystemDark = systemTheme === 'dark';
+
 	return (
 		<Switch
-			defaultSelected={theme === "dark"}
+			isSelected={theme === 'dark'}
 			size="md"
 			color="secondary"
 			startContent={<Sun size={18} />}
 			endContent={<Moon size={18} />}
 			onValueChange={(isSelected) => {
-				console.log("isSelected", isSelected);
-				setTheme(isSelected ? "dark" : "light");
+				setTheme(isSelected ? 'dark' : 'light');
 			}}
+			defaultSelected={isSystemDark}
 		/>
 	);
 }
