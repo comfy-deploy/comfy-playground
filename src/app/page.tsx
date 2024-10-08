@@ -69,7 +69,7 @@ function App() {
 
 	// Use the Zustand stores
 	const { outputs, addOutput, clearOutputs } = useOutputStore();
-	const { inputValues, setInputValue, setAllInputValues } = useInputStore();
+	// const { inputValues, setInputValue, setAllInputValues } = useInputStore();
 
 	// Auto-select the first deployment if available
 	useEffect(() => {
@@ -85,7 +85,7 @@ function App() {
 	const [isRunning, setIsRunning] = useState(false);
 	const [log, setLog] = useState<string[]>([]);
 	const [output, setOutput] = useState<string[]>([]);
-	// const [inputValues, setInputValues] = useState<Record<string, any>>({});
+	const [inputValues, setInputValues] = useState<Record<string, any>>({});
 
 	const handleRun = useCallback(async () => {
 		if (selectedDeployment) {
@@ -165,7 +165,7 @@ function App() {
 								<InputForm
 									inputTypes={selectedDeployment.inputTypes ?? []}
 									inputValues={inputValues}
-									setInputValues={setAllInputValues} // Use the store's setAllInputValues
+									setInputValues={setInputValues} // Use the store's setAllInputValues
 								/>
 								<div className="flex-grow" />
 								<div className="mt-6">
