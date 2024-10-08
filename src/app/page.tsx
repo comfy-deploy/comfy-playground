@@ -20,7 +20,7 @@ import { OutputDisplay } from "./components/output-display";
 import { InputForm } from "./components/input-form";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 import { useInputStore, useOutputStore } from "./store/store";
-import { Icon } from "./components/icon";
+import { Icon } from "./components/cd-icon";
 
 export default function Home() {
 	return (

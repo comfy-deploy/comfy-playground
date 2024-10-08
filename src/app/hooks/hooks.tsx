@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider, useMutation, useQuery } from "@tansta
 
 import { ComfyDeploy } from "comfydeploy";
 
-const url = window.location.origin;
+const url = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
 export const cd = new ComfyDeploy({
 	serverURL: `${url}/api/cd`,
@@ -18,12 +18,15 @@ type ExcludeUnderscoreKeys<T> = {
 export function useComfyQuery<
 	K extends keyof ExcludeUnderscoreKeys<ComfyDeploy>,
 	M extends keyof ExcludeUnderscoreKeys<ComfyDeploy[K]>,
+	// @ts-ignore
 	P extends Parameters<ComfyDeploy[K][M]>,
+	// @ts-ignore
 	R = Awaited<ReturnType<ComfyDeploy[K][M]>>,
 >(cdKey: K, method: M, params: P, options = {}) {
 	return useQuery({
 		queryKey: [cdKey, method],
 		queryFn: async () => {
+			// @ts-ignore
 			const data = await cd[cdKey][method](...params);
 			console.log(data);
 			return data as R;
@@ -35,11 +38,14 @@ export function useComfyQuery<
 export function useComfyMutation<
 	K extends keyof ExcludeUnderscoreKeys<ComfyDeploy>,
 	M extends keyof ExcludeUnderscoreKeys<ComfyDeploy[K]>,
+	// @ts-ignore
 	P extends Parameters<ComfyDeploy[K][M]>[0],
+	// @ts-ignore
 	R = Awaited<ReturnType<ComfyDeploy[K][M]>>,
 >(cdKey: K, method: M, options = {}) {
 	return useMutation({
 		mutationFn: async (params: P) => {
+			// @ts-ignore
 			const data = await cd[cdKey][method](params);
 			console.log(data);
 			return data as R;
