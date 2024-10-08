@@ -33,7 +33,7 @@ export function InputForm({
 	}, [inputTypes, setInputValues]);
 
 	const handleInputChange = (inputId: string, value: any) => {
-		console.log("value", value);
+		// console.log("value", value);
 		setInputValues((prev) => ({ ...prev, [inputId]: value }));
 	};
 
