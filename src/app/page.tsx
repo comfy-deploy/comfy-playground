@@ -173,7 +173,7 @@ interface DeploymentState {
 	setSelectedDeployment: (deployment: DeploymentModel | null) => void;
 }
 
-export const useDeploymentStore = create<DeploymentState>((set) => ({
+const useDeploymentStore = create<DeploymentState>((set) => ({
 	selectedDeployment: null,
 	setSelectedDeployment: (deployment) =>
 		set({ selectedDeployment: deployment }),
