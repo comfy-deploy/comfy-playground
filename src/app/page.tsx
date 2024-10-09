@@ -179,7 +179,7 @@ export const useDeploymentStore = create<DeploymentState>((set) => ({
 		set({ selectedDeployment: deployment }),
 }));
 
-export function DeploymentDropdown() {
+function DeploymentDropdown() {
 	const { data: deployments, isLoading } = useComfyQuery(
 		"deployments",
 		"list",
