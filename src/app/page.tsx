@@ -44,7 +44,7 @@ export default function Home() {
 							as="a"
 							color="default"
 							size="sm"
-							href="https://github.com/your-repo-url"
+							href="https://github.com/comfy-deploy/comfy-playground"
 							target="_blank"
 							variant="flat"
 							isIconOnly
