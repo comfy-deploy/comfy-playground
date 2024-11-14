@@ -23,7 +23,7 @@ export async function DELETE(request: NextRequest) {
 async function handleRequest(request: NextRequest) {
 	const { pathname, search } = request.nextUrl;
 	const apiPath = pathname.replace("/api/cd", "");
-	const url = `https://staging.api.comfydeploy.com/api${apiPath}${search}`;
+	const url = `https://api.comfydeploy.com/api${apiPath}${search}`;
 
 	const headers = new Headers(request.headers);
 	headers.delete("host");
