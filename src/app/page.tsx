@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cd, useComfyQuery } from "./hooks/hooks";
-import { Select, SelectItem } from "@nextui-org/select";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Divider } from "@nextui-org/divider";
@@ -19,12 +18,12 @@ import { ScrollableContent } from "./components/scrollable-content";
 import { OutputDisplay } from "./components/output-display";
 import { InputForm } from "./components/input-form";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
-import { useInputStore, useOutputStore } from "./store/store";
+import { useOutputStore } from "./store/store";
 import { Icon } from "./components/cd-icon";
 import { DeploymentModel } from "comfydeploy/models/components";
 import { create } from "zustand";
-import { Spinner } from "@nextui-org/spinner";
 import { Skeleton } from "@nextui-org/skeleton";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   return (
@@ -63,15 +62,11 @@ export default function Home() {
 }
 
 function App() {
+  const router = useRouter();
   const { selectedDeployment } = useDeploymentStore();
-
-  // Use the Zustand stores
   const { outputs, addOutput, clearOutputs } = useOutputStore();
-  // const { inputValues, setInputValue, setAllInputValues } = useInputStore();
-
   const [isRunning, setIsRunning] = useState(false);
   const [log, setLog] = useState<string[]>([]);
-  const [output, setOutput] = useState<string[]>([]);
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
 
   const handleRun = useCallback(async () => {
@@ -79,7 +74,7 @@ function App() {
       console.log(`Running deployment: ${selectedDeployment.id}`);
       setIsRunning(true);
       setLog([]);
-      clearOutputs(); // Clear previous outputs
+      clearOutputs();
       try {
         console.log(inputValues);
 
@@ -95,7 +90,7 @@ function App() {
             if (chunk.data.event === "output_ready") {
               console.log("fkfk", Object.keys(chunk.data.data.output));
               console.log("fkfk", Object.values(chunk.data.data.output));
-              addOutput(chunk.data.data); // Add new output to the store
+              addOutput(chunk.data.data);
             }
           }
         }
@@ -140,7 +135,7 @@ function App() {
               <InputForm
                 inputTypes={selectedDeployment.inputTypes ?? []}
                 inputValues={inputValues}
-                setInputValues={setInputValues} // Use the store's setAllInputValues
+                setInputValues={setInputValues}
               />
               <div className="flex-grow" />
               <div className="mt-6">
@@ -163,7 +158,7 @@ function App() {
 
         <div className="space-y-6">
           <ScrollableContent title="Log" content={log} />
-          <OutputDisplay outputs={outputs} /> {/* Use outputs from the store */}
+          <OutputDisplay outputs={outputs} />
         </div>
       </div>
     </div>
@@ -190,7 +185,6 @@ function DeploymentDropdown() {
 
   const { selectedDeployment, setSelectedDeployment } = useDeploymentStore();
 
-  // Auto-select the first deployment if available
   useEffect(() => {
     if (deployments && deployments.length > 0 && !selectedDeployment) {
       setSelectedDeployment(deployments[0]);
@@ -211,7 +205,6 @@ function DeploymentDropdown() {
 
   return (
     <Autocomplete
-      // label="Select a deployment"
       placeholder="Search and choose a deployment"
       defaultSelectedKey={deployments[0].id}
       size="sm"
